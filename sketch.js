@@ -5,6 +5,7 @@ const height = document.body.clientHeight
 let particlesCount = 100;
 let particles = [];
 
+let bg = [0,0,0]
 
 random = p5.prototype.random
 
@@ -22,21 +23,28 @@ let presets = [{ color: 'red', pref: { red: random(-1, 1), blue: random(-1, 1), 
 
 
 // basic testing preset where every color likes itself and hates the other color
-basicPresets = [{ color: 'red', pref: { red: 1, blue: -1,  } },
-                          { color: 'blue', pref: { red: -1, blue: 1,  } }]
+let funPreset 
 
+
+function preload() {
+  let coronaIcon = loadImage('images/corona.webp');
+  let bloodCellsIcon = loadImage('images/blood.png');
+  funPreset = [{ img: coronaIcon, color: 'red', pref: { red: 0.2, blue: 1,  } },
+                  { img: bloodCellsIcon ,color: 'blue', pref: { red: -1, blue: 0.2,  } }]
+}
 
 function setup() {
   createCanvas(width, height);
 
   for (let i = 0; i < particlesCount; i++) {
     let pres = presets[Math.floor(Math.random() * presets.length)]
-    particles[i] = new Particle(random(width), random(height), pres.color,pres.pref);
+    particles[i] = new Particle(random(width), random(height), pres.color,pres.pref, pres.img);
   }
+
 }
 
 function draw() {
-  background(10);
+  background(bg[0],bg[1],bg[2]);
 
   for (let i = 0; i < particles.length; i++) {
     particles[i].live(particles);
@@ -49,7 +57,7 @@ function draw() {
 
 
 class Particle {
-  constructor(x, y, color, pref) {
+  constructor(x, y, color, pref, img) {
     this.acceleration = createVector(0, 0);
     this.velocity = p5.Vector.random2D();
     this.position = createVector(x, y);
@@ -58,6 +66,7 @@ class Particle {
     this.maxforce = 0.05;
     this.color = color
     this.pref = pref
+    this.image = img
   }
 
   live(prtcls) {
@@ -110,9 +119,12 @@ class Particle {
   }
   
   render() {
-    fill(colors[this.color][0],colors[this.color][1],colors[this.color][2], 100);
-    stroke(this.color);
-    ellipse(this.position.x, this.position.y, 16, 16);
+    if (this.image) image(this.image,this.position.x, this.position.y, 16, 16);
+    else {
+      fill(colors[this.color][0],colors[this.color][1],colors[this.color][2], 100);
+      stroke(this.color);
+      ellipse(this.position.x, this.position.y, 16, 16);
+    }
   }
   
   borders() {
@@ -195,7 +207,8 @@ class Particle {
 }
 
 function toggleBasicMode() {
-    if (presets == basicPresets) location.reload()
-    presets = basicPresets
+    if (presets == funPreset) location.reload()
+    presets = funPreset
+    bg = [59, 6, 6]
     setup()
 }
